@@ -1,0 +1,47 @@
+name: dbt ci
+
+# Run the workflow when a commit is pushed to any branch except main
+on:
+  pull_request:
+  push:
+    branches:
+      - '!main'
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out the dbt repository under $GITHUB_WORKSPACE, so the workflow can access it
+      - name: checkout
+        uses: actions/checkout@v3
+
+      # https://github.com/marketplace/actions/setup-python
+      - uses: actions/setup-python@v4.5.0
+        with:
+          # The python-version input is optional. If not supplied, the action will try to resolve the version from the default .python-version file.
+          python-version: '3.10'
+
+      # Install dbt packages defined in packages.yml
+      - name: dbt deps
+        run: dbt deps
+
+      # Retrieve the PR number and set it to the variable findPR
+      - name: Find Current Pull Request
+        uses: jwalton/gh-find-current-pr@v1.3.2
+        id: findPR
+        # This will echo "Your PR is 7", or be skipped if there is no current PR.
+        - run: echo "Your PR is ${PR}"
+        if: success() && steps.findPr.outputs.number
+        env:
+          PR: ${{ steps.findPr.outputs.pr }}
+
+      # Run and test modified dbt models and models downstream of them
+      # Otherwise defer to production for unmodified models
+      - name: dbt build
+        run: dbt build --profiles-dir ./
+        env:
+          MZ_HOST: ${{ secrets.MZ_HOST_STG }}
+          MZ_USER: ${{ secrets.MZ_USER }}
+          MZ_PASSWORD: ${{ secrets.MZ_PASSWORD_STG }}
+          CI_TAG: "${{ format('{0}_{1}', 'gh_ci', steps.findPr.outputs.pr) }}"
