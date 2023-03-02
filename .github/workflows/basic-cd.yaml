@@ -1,14 +1,13 @@
-name: dbt slim ci
+name: dbt basic cd
 
-# Run the workflow when a commit is pushed to any branch except main
+# Run the workflow when a Pull Request is closed (or merged)
 on:
   pull_request:
-  push:
-    branches:
-      - '!main'
+    types:
+      - closed
 
 jobs:
-  ci:
+  cd:
     runs-on: ubuntu-latest
 
     steps:
@@ -55,41 +54,24 @@ jobs:
           source .venv/bin/activate
           dbt deps
 
-      # Retrieve the PR number and set it to the variable findPR
-      - name: Find Current Pull Request
-        uses: jwalton/gh-find-current-pr@v1.3.2
-        id: findPR
-        with:
-          state: open
-          sha: ${{ github.event.pull_request.head.sha }}
-      # This will echo "Your PR is 7", or be skipped if there is no current PR.
-      - run: echo "Your PR is ${PR}"
-        if: success() && steps.findPr.outputs.number
+      # Run and test modified dbt models and models downstream of them
+      # Otherwise defer to production for unmodified models
+      - name: dbt build
         env:
-          PR: ${{ steps.findPr.outputs.pr }}
+          MZ_HOST: ${{ secrets.MZ_HOST_PROD }}
+          MZ_USER: ${{ secrets.MZ_PROD }}
+          MZ_PASSWORD: ${{ secrets.MZ_PASSWORD_PROD }}
+          CI_TAG: "${{ format('{0}_{1}', 'gh_ci', github.event.number ) }}"
+        run: |
+          source .venv/bin/activate
+          dbt run-operation drop_cluster
+          dbt build --profiles-dir ./ --target production
 
-      #----------------------------------------------
-      # dbt
-      #----------------------------------------------
-
-      - name: download manifest from s3
+      - name: upload manifest to s3
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
           AWS_REGION: us-east-1
         run: |
-          aws s3 cp s3://mz-test-dbt/manifest.json ./manifest.json
-
-      - name: dbt build
-        env:
-          MZ_HOST_STG: ${{ secrets.MZ_HOST_STG }}
-          MZ_USER: ${{ secrets.MZ_USER }}
-          MZ_PASSWORD_STG: ${{ secrets.MZ_PASSWORD_STG }}
-          CI_TAG: "${{ format('{0}_{1}', 'gh_ci', steps.findPr.outputs.pr) }}"
-        run: |
-          source .venv/bin/activate
-          dbt run-operation create_cluster
-          dbt ls --select state:modified --state ./
-          dbt ls --select state:modified+ --state ./
-          dbt build --profiles-dir ./ --select state:modified+ --defer --state ./
+          aws s3 cp ./target/manifest.json s3://mz-test-dbt

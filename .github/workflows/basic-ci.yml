@@ -1,4 +1,4 @@
-name: dbt ci
+name: dbt basic ci
 
 # Run the workflow when a commit is pushed to any branch except main
 on:
@@ -71,7 +71,7 @@ jobs:
       #----------------------------------------------
       # dbt
       #----------------------------------------------
-      # 
+      #
       - name: dbt build
         env:
           MZ_HOST_STG: ${{ secrets.MZ_HOST_STG }}
@@ -80,5 +80,5 @@ jobs:
           CI_TAG: "${{ format('{0}_{1}', 'gh_ci', steps.findPr.outputs.pr) }}"
         run: |
           source .venv/bin/activate
-          dbt run-operation create_cluster --args '{cluster_name: $CI_TAG}'
+          dbt run-operation create_cluster
           dbt build --profiles-dir ./

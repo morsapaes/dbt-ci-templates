@@ -61,10 +61,10 @@ models:
         description: ''
       - name: item_name
         description: ''
-        tests:
-          - not_null
       - name: item_category
         description: ''
+        tests:
+          - not_null
       - name: items_sold
         description: ''
       - name: revenue
