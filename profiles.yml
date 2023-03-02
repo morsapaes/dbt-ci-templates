@@ -1,0 +1,12 @@
+mz_get_started:
+  outputs:
+    staging:
+      type: materialize
+      host: "{{ env_var('MZ_HOST_STG') }}"
+      port: 6875
+      user: "{{ env_var('MZ_USER') }}"
+      password: "{{ env_var('MZ_PASSWORD_STG') }}"
+      database: materialize
+      cluster: "{{ env_var('CI_TAG') }}"
+      schema: "{{ env_var('CI_TAG') }}"
+  target: staging
