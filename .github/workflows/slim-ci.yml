@@ -16,11 +16,17 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
 
+      - name: Install Poetry
+        run: pipx install poetry
+
       # https://github.com/marketplace/actions/setup-python
+      # For advanced options, see: https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md
       - uses: actions/setup-python@v4.5.0
         with:
           # The python-version input is optional. If not supplied, the action will try to resolve the version from the default .python-version file.
           python-version: '3.10'
+          cache: poetry
+      - run: poetry install
 
       # Install dbt packages defined in packages.yml
       - name: dbt deps

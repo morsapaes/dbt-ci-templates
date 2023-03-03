@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "ci"
+version = "0.1.0"
+authors = ["Marta Paes <marta@materialize.com>"]
+description = "dbt CI templates"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "<3.11,>=3.8.0"
+dbt-materialize = "1.4.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
