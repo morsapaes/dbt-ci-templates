@@ -15,7 +15,7 @@ materialize:
       port: 6875
       user: "{{ env_var('MZ_USER') }}"
       password: "{{ env_var('MZ_PASSWORD_PROD') }}"
-      database: db_production
+      database: materialize
       cluster: quickstart
       schema: qck
   target: staging
