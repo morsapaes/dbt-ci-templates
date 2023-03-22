@@ -2,6 +2,7 @@
 
 SELECT
     ip.item_id AS item_id,
+    i.item_name AS item_name,
     i.category AS item_category,
     ip.latest_order AS latest_order,
     SUM(ip.items_sold) AS items_sold,
@@ -9,4 +10,4 @@ SELECT
     SUM(ip.orders) AS orders
 FROM {{ ref('item_purchases') }} AS ip
 INNER JOIN {{ ref('items') }} AS i ON ip.item_id = i.id
-GROUP BY item_id, item_category, latest_order
+GROUP BY item_id, item_name, item_category, latest_order
