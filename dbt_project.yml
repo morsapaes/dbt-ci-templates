@@ -2,7 +2,7 @@ name: 'mz_get_started'
 version: '1.0.0'
 config-version: 2
 
-profile: 'mz_get_started'
+profile: 'materialize'
 
 model-paths: ['models']
 
@@ -12,6 +12,6 @@ clean-targets:
   - 'dbt_modules'
 
 tests:
-  mz_get_started:
+  materialize:
     +store_failures: true
     +schema: 'etl_failure'

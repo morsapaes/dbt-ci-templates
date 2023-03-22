@@ -1,4 +1,4 @@
-mz_get_started:
+materialize:
   outputs:
     staging:
       type: materialize
@@ -6,7 +6,16 @@ mz_get_started:
       port: 6875
       user: "{{ env_var('MZ_USER') }}"
       password: "{{ env_var('MZ_PASSWORD_STG') }}"
-      database: materialize
+      database: db_staging
       cluster: "{{ env_var('CI_TAG') }}"
-      schema: "{{ env_var('CI_TAG') }}"
+      schema: qck
+    production:
+      type: materialize
+      host: "{{ env_var('MZ_HOST_PROD') }}"
+      port: 6875
+      user: "{{ env_var('MZ_USER') }}"
+      password: "{{ env_var('MZ_PASSWORD_PROD') }}"
+      database: db_production
+      cluster: quickstart
+      schema: qck
   target: staging
