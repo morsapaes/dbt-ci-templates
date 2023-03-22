@@ -3,19 +3,21 @@
 #}
 {% macro create_cluster(cluster_name=env_var('CI_TAG')) %}
 
-  {% if cluster_name %}
+{%- if cluster_name -%}
 
-    {%- call statement('catalog', fetch_result=True) -%}
-        SELECT name
-        FROM mz_clusters
-        WHERE name = lower('{{ cluster_name }}')
-    {%- endcall -%}
+  {%- call statement('catalog', fetch_result=True) -%}
+      SELECT name
+      FROM mz_clusters
+      WHERE name = lower('{{ cluster_name }}')
+  {%- endcall -%}
 
-    {%- set result = load_result('catalog') -%}
+  {%- set result_catalog = load_result('catalog') -%}
 
-    {% if result %}
+  {{ log(result_catalog['data'], info=True)}}
 
-      {{ log("Cluster " ~ cluster_name ~ " already exists, skipping cluster creation...", info=True) }}
+  {%- if result_catalog['data']|length > 0 -%}
+
+    {{ log("Cluster " ~ cluster_name ~ " already exists, skipping cluster creation...", info=True) }}
 
     {% else %}
 
@@ -25,8 +27,8 @@
           CREATE CLUSTER {{ cluster_name }} REPLICAS (r1 (SIZE = '2xsmall'))
       {%- endcall %}
 
-      {%- set result = load_result('create_cluster') -%}
-      {{ log(result['data'][0][0], info=True)}}
+      {%- set result_create_cluster = load_result('create_cluster') -%}
+      {{ log(result_create_cluster['data'][0][0], info=True)}}
 
     {% endif %}
 

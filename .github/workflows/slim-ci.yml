@@ -89,7 +89,7 @@ jobs:
           CI_TAG: "${{ format('{0}_{1}', 'gh_ci', steps.findPr.outputs.pr) }}"
         run: |
           source .venv/bin/activate
-          dbt run-operation create_cluster
+          dbt --debug run-operation create_cluster
           dbt ls --select state:modified --state ./
           dbt ls --select state:modified+ --state ./
           dbt build --profiles-dir ./ --select state:modified+ --defer --state ./
