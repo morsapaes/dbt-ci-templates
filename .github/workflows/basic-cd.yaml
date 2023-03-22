@@ -58,9 +58,9 @@ jobs:
       # Otherwise defer to production for unmodified models
       - name: dbt build
         env:
-          MZ_HOST_PROD: ${{ secrets.MZ_HOST_PROD }}
-          MZ_USER: ${{ secrets.MZ_PROD }}
-          MZ_PASSWORD_PROD: ${{ secrets.MZ_PASSWORD_PROD }}
+          MZ_HOST: ${{ secrets.MZ_HOST }}
+          MZ_USER: ${{ secrets.MZ_USER }}
+          MZ_PASSWORD: ${{ secrets.MZ_PASSWORD }}
           CI_TAG: "${{ format('{0}_{1}', 'gh_ci', github.event.number ) }}"
         run: |
           source .venv/bin/activate

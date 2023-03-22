@@ -74,9 +74,9 @@ jobs:
       #
       - name: dbt build
         env:
-          MZ_HOST_STG: ${{ secrets.MZ_HOST_STG }}
+          MZ_HOST: ${{ secrets.MZ_HOST }}
           MZ_USER: ${{ secrets.MZ_USER }}
-          MZ_PASSWORD_STG: ${{ secrets.MZ_PASSWORD_STG }}
+          MZ_PASSWORD: ${{ secrets.MZ_PASSWORD }}
           CI_TAG: "${{ format('{0}_{1}', 'gh_ci', steps.findPr.outputs.pr) }}"
         run: |
           source .venv/bin/activate
