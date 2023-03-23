@@ -64,6 +64,7 @@ jobs:
           CI_TAG: "${{ format('{0}_{1}', 'gh_ci', github.event.number ) }}"
         run: |
           source .venv/bin/activate
+          dbt run-operation drop_cluster
           dbt build --profiles-dir ./ --target production
 
       - name: upload manifest to s3
