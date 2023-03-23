@@ -1,7 +1,7 @@
 {#
 -- This macro drops a cluster used in CI.
 #}
-{% macro drop_cluster(cluster_name=env_var('CI_TAG')) %}
+{% macro drop_environment(cluster_name=env_var('CI_TAG')) %}
 
 {%- if cluster_name -%}
 
