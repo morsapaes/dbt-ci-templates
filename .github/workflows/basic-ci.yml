@@ -1,6 +1,6 @@
 name: dbt basic ci
 
-# Run the workflow when a commit is pushed to any branch except main
+# Run the workflow when a commit is pushed to any branch except main.
 on:
   pull_request:
   push:
@@ -12,19 +12,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      #----------------------------------------------
-      #       check-out repo and setup python
-      #----------------------------------------------
-      - name: checkout
+      #-----------------------------------------------
+      # check-out repo, find PR and setup python
+      #-----------------------------------------------
+      - name: Checkout repo
         uses: actions/checkout@v3
+
+      # Retrieve the PR number using the hash for the current commit. This
+      # guarantees that the workflow works for push events, too.
+      # https://github.com/jwalton/gh-find-current-pr
+      - name: Find current pull request
+        uses: jwalton/gh-find-current-pr@v1.3.2
+        id: findPR
+        with:
+          state: open
+          sha: ${{ github.event.pull_request.head.sha }}
+      - run: echo "Running for PR \#${PR}"
+        if: success() && steps.findPr.outputs.number
+        env:
+          PR: ${{ steps.findPr.outputs.pr }}
 
       - uses: actions/setup-python@v4.5.0
         with:
           python-version: '3.10'
 
-      #----------------------------------------------
-      #  -----  install & configure poetry  -----
-      #----------------------------------------------
+      #-----------------------------------------------
+      # Install & configure poetry
+      #-----------------------------------------------
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
@@ -32,9 +46,9 @@ jobs:
           virtualenvs-in-project: true
           installer-parallel: true
 
-      #----------------------------------------------
-      #       load cached venv if cache exists
-      #----------------------------------------------
+      #-----------------------------------------------
+      # load cached venv if cache exists
+      #-----------------------------------------------
       - name: Load cached venv
         id: cached-poetry-dependencies
         uses: actions/cache@v3
@@ -42,9 +56,9 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
-      #----------------------------------------------
+      #-----------------------------------------------
       # install dependencies if cache does not exist
-      #----------------------------------------------
+      #-----------------------------------------------
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
@@ -55,24 +69,14 @@ jobs:
           source .venv/bin/activate
           dbt deps
 
-      # Retrieve the PR number and set it to the variable findPR
-      - name: Find Current Pull Request
-        uses: jwalton/gh-find-current-pr@v1.3.2
-        id: findPR
-        with:
-          state: open
-          sha: ${{ github.event.pull_request.head.sha }}
-      # This will echo "Your PR is 7", or be skipped if there is no current PR.
-      - run: echo "Your PR is ${PR}"
-        if: success() && steps.findPr.outputs.number
-        env:
-          PR: ${{ steps.findPr.outputs.pr }}
-
-      #----------------------------------------------
+      #-----------------------------------------------
       # dbt
-      #----------------------------------------------
+      #-----------------------------------------------
+      # - Create CI environment associated with the PR
       #
-      - name: dbt build
+      # - Run and test all dbt models (i.e. full run)
+      #-----------------------------------------------
+      - name: Build dbt
         env:
           MZ_HOST: ${{ secrets.MZ_HOST }}
           MZ_USER: ${{ secrets.MZ_USER }}
@@ -80,5 +84,5 @@ jobs:
           CI_TAG: "${{ format('{0}_{1}', 'gh_ci', steps.findPr.outputs.pr) }}"
         run: |
           source .venv/bin/activate
-          dbt run-operation create_cluster
+          dbt run-operation create_environment
           dbt build --profiles-dir ./

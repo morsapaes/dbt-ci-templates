@@ -1,10 +1,12 @@
 {#
 -- This macro creates a new cluster that will be torn down once the PR is closed (or merged).
 #}
-{% macro create_cluster(cluster_name=env_var('CI_TAG')) %}
+{% macro create_environment(cluster_name=env_var('CI_TAG')) %}
 
 {%- if cluster_name -%}
-
+  # We removed the IF NOT EXISTS clause from CREATE CLUSTER in #12002, so need a
+  # workaround to handle pushes
+  # https://github.com/MaterializeInc/materialize/pull/12002
   {%- call statement('catalog', fetch_result=True) -%}
       SELECT name
       FROM mz_clusters
