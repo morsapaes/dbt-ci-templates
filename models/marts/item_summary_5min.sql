@@ -2,7 +2,7 @@
 
 SELECT
     item_id,
-    item_name,
+    --item_name,
     item_category,
     items_sold,
     revenue,
