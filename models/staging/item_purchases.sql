@@ -2,7 +2,7 @@
 
 SELECT
     item_id,
-    SUM(quantity) AS items_sold,
+    --SUM(quantity) AS items_sold,
     SUM(purchase_price) AS revenue,
     COUNT(id) AS orders,
     MAX(created_at::timestamp) AS latest_order

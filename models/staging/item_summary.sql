@@ -5,7 +5,7 @@ SELECT
     i.name AS item_name,
     i.category AS item_category,
     ip.latest_order AS latest_order,
-    SUM(ip.items_sold) AS items_sold,
+    --SUM(ip.items_sold) AS items_sold,
     SUM(ip.revenue) AS revenue,
     SUM(ip.orders) AS orders
 FROM {{ ref('item_purchases') }} AS ip
