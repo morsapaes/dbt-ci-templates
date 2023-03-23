@@ -12,7 +12,6 @@
   {%- endcall %}
 
   {%- set result = load_result('drop_cluster_cluster') -%}
-  {{ log(result['data'][0][0], info=True)}}
 
   {% else %}
 
