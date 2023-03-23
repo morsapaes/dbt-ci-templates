@@ -1,43 +1,28 @@
-name: dbt basic ci
+name: dbt basic cd
 
-# Run the workflow when a commit is pushed to any branch except main.
+# Run the workflow when a pull request is closed (or merged)
 on:
   pull_request:
-  push:
-    branches:
-      - '!main'
+    types:
+      - closed
 
 jobs:
-  run:
+  cd:
     runs-on: ubuntu-latest
 
     steps:
       #----------------------------------------------
-      # check-out repo, find PR and setup python
+      #       check-out repo and setup python
       #----------------------------------------------
-      - name: Checkout repo
+      - name: checkout
         uses: actions/checkout@v3
-
-      # Retrieve the PR number using the hash for the current commit. This
-      # guarantees that the workflow works for push events, too.
-      # https://github.com/jwalton/gh-find-current-pr
-      - name: Find current pull request
-        uses: jwalton/gh-find-current-pr@v1.3.2
-        id: findPR
-        with:
-          state: open
-          sha: ${{ github.event.pull_request.head.sha }}
-      - run: echo "Running for PR \#${PR}"
-        if: success() && steps.findPr.outputs.number
-        env:
-          PR: ${{ steps.findPr.outputs.pr }}
 
       - uses: actions/setup-python@v4.5.0
         with:
           python-version: '3.10'
 
       #----------------------------------------------
-      # Install & configure poetry
+      #  -----  install & configure poetry  -----
       #----------------------------------------------
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -47,7 +32,7 @@ jobs:
           installer-parallel: true
 
       #----------------------------------------------
-      # load cached venv if cache exists
+      #       load cached venv if cache exists
       #----------------------------------------------
       - name: Load cached venv
         id: cached-poetry-dependencies
@@ -69,16 +54,24 @@ jobs:
           source .venv/bin/activate
           dbt deps
 
-      #----------------------------------------------
-      # dbt
-      #----------------------------------------------
+      # Run and test modified dbt models and models downstream of them
+      # Otherwise defer to production for unmodified models
       - name: dbt build
         env:
           MZ_HOST: ${{ secrets.MZ_HOST }}
           MZ_USER: ${{ secrets.MZ_USER }}
           MZ_PASSWORD: ${{ secrets.MZ_PASSWORD }}
-          CI_TAG: "${{ format('{0}_{1}', 'gh_ci', steps.findPr.outputs.pr) }}"
+          CI_TAG: "${{ format('{0}_{1}', 'gh_ci', github.event.number ) }}"
         run: |
           source .venv/bin/activate
-          dbt run-operation create_cluster
-          dbt build --profiles-dir ./
+          dbt --debug run-operation drop_cluster
+          dbt build --profiles-dir ./ --target production
+
+      - name: upload manifest to s3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+          AWS_REGION: us-east-1
+        run: |
+          aws s3 cp ./target/manifest.json s3://mz-test-dbt

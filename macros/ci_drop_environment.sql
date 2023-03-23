@@ -7,11 +7,11 @@
 
   {{ log("Dropping cluster " ~ cluster_name ~ "...", info=True) }}
 
-  {% call statement('create_cluster', fetch_result=True, auto_begin=False) -%}
+  {% call statement('drop_cluster', fetch_result=True, auto_begin=False) -%}
       DROP CLUSTER IF EXISTS {{ cluster_name }} CASCADE
   {%- endcall %}
 
-  {%- set result = load_result('create_cluster') -%}
+  {%- set result = load_result('drop_cluster_cluster') -%}
   {{ log(result['data'][0][0], info=True)}}
 
   {% else %}

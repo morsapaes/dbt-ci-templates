@@ -1,6 +1,6 @@
 name: dbt basic cd
 
-# Run the workflow when a Pull Request is closed (or merged)
+# Run the workflow when a pull request is closed (or merged).
 on:
   pull_request:
     types:
@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      #----------------------------------------------
-      #       check-out repo and setup python
-      #----------------------------------------------
+      #-----------------------------------------------
+      # check-out repo and setup python
+      #-----------------------------------------------
       - name: checkout
         uses: actions/checkout@v3
 
@@ -21,9 +21,9 @@ jobs:
         with:
           python-version: '3.10'
 
-      #----------------------------------------------
-      #  -----  install & configure poetry  -----
-      #----------------------------------------------
+      #-----------------------------------------------
+      # install & configure poetry
+      #-----------------------------------------------
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
@@ -31,9 +31,9 @@ jobs:
           virtualenvs-in-project: true
           installer-parallel: true
 
-      #----------------------------------------------
-      #       load cached venv if cache exists
-      #----------------------------------------------
+      #-----------------------------------------------
+      # load cached venv if cache exists
+      #-----------------------------------------------
       - name: Load cached venv
         id: cached-poetry-dependencies
         uses: actions/cache@v3
@@ -54,9 +54,18 @@ jobs:
           source .venv/bin/activate
           dbt deps
 
-      # Run and test modified dbt models and models downstream of them
-      # Otherwise defer to production for unmodified models
-      - name: dbt build
+      #-----------------------------------------------
+      # dbt
+      #-----------------------------------------------
+      # - Write manifest file to s3 after run
+      #
+      # - Drop CI environment associated with the PR
+      #
+      # - Run and test modified dbt models and models
+      #   downstream of them. Otherwise, defer to pro-
+      #   duction for unmodified models
+      #-----------------------------------------------
+      - name: Build dbt
         env:
           MZ_HOST: ${{ secrets.MZ_HOST }}
           MZ_USER: ${{ secrets.MZ_USER }}
