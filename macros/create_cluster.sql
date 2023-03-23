@@ -28,7 +28,6 @@
       {%- endcall %}
 
       {%- set result_create_cluster = load_result('create_cluster') -%}
-      {{ log(result_create_cluster['data'][0][0], info=True)}}
 
     {% endif %}
 
