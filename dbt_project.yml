@@ -12,6 +12,6 @@ clean-targets:
   - 'dbt_modules'
 
 tests:
-  materialize:
+  mz_get_started:
     +store_failures: true
     +schema: 'etl_failure'
