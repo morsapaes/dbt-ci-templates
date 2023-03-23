@@ -13,8 +13,6 @@
 
   {%- set result_catalog = load_result('catalog') -%}
 
-  {{ log(result_catalog['data'], info=True)}}
-
   {%- if result_catalog['data']|length > 0 -%}
 
     {{ log("Cluster " ~ cluster_name ~ " already exists, skipping cluster creation...", info=True) }}
@@ -28,6 +26,7 @@
       {%- endcall %}
 
       {%- set result_create_cluster = load_result('create_cluster') -%}
+      {{ log(result_create_cluster['data'][0][0], info=True)}}
 
     {% endif %}
 
