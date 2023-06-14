@@ -1,4 +1,4 @@
-name: dbt basic cd
+name: dbt slim cd
 
 # Run the workflow when a pull request is closed (or merged).
 on:
@@ -58,11 +58,23 @@ jobs:
       #-----------------------------------------------
       # dbt
       #-----------------------------------------------
-      # - Run and test all dbt models (i.e. full run)
+      # - Fetch manifest file from s3
       #
       # - Drop CI environment associated with the PR
       #
+      # - Run and test modified dbt models and models
+      #   downstream of them.
+      #
+      # - Write manifest file to s3 after run
       #-----------------------------------------------
+      - name: Download production manifest from s3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+          AWS_REGION: us-east-1
+        run: |
+          aws s3 cp s3://mz-test-dbt/manifest.json ./manifest.json
 
       - name: Build dbt
         env:
@@ -73,7 +85,16 @@ jobs:
         run: |
           source .venv/bin/activate
           dbt run-operation drop_environment
-          dbt build --profiles-dir ./ --target production
+          dbt build --profiles-dir ./ --select state:modified+ --state ./ --target production
+
+      - name: upload new manifest to s3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+          AWS_REGION: us-east-1
+        run: |
+          aws s3 cp ./target/manifest.json s3://mz-test-dbt
 
   close:
     if: github.event.pull_request.merged == false
