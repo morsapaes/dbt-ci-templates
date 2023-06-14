@@ -76,8 +76,9 @@ jobs:
       #
       # - Create CI environment associated with the PR
       #
-      # - Run and test modified dbt models (i.e. par-
-      #   tial run)
+      # - Run and test modified dbt models and models
+      #   downstream of them. Otherwise, defer to pro-
+      #   duction for unmodified models
       #-----------------------------------------------
       - name: Download production manifest from s3
         env:
