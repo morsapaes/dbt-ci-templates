@@ -24,7 +24,7 @@
       {{ log("Creating cluster " ~ cluster_name ~ "...", info=True) }}
 
       {% call statement('create_cluster', fetch_result=True, auto_begin=False) -%}
-          CREATE CLUSTER {{ cluster_name }} REPLICAS (r1 (SIZE = '2xsmall'))
+          CREATE CLUSTER {{ cluster_name }} SIZE = '2xsmall'
       {%- endcall %}
 
       {%- set result_create_cluster = load_result('create_cluster') -%}
