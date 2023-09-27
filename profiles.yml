@@ -8,7 +8,6 @@ materialize:
       password: "{{ env_var('MZ_PASSWORD') }}"
       database: db_staging
       cluster: "{{ env_var('CI_TAG') }}"
-      schema: qck
     production:
       type: materialize
       host: "{{ env_var('MZ_HOST') }}"
@@ -16,6 +15,5 @@ materialize:
       user: "{{ env_var('MZ_USER') }}"
       password: "{{ env_var('MZ_PASSWORD') }}"
       database: db_production
-      cluster: quickstart
-      schema: qck
+      cluster: demo
   target: staging
