@@ -1,4 +1,4 @@
-{{ config(materialized='view', indexes=[{'columns': 'buyer'}, {'columns': 'seller'}]) }}
+{{ config(materialized='view') }}
 
 SELECT DISTINCT ON
   (auctions.id) bids.*,
