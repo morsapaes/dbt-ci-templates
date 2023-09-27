@@ -1,4 +1,4 @@
-name: dbt basic cd
+name: dbt slim cd
 
 # Run the workflow when a pull request is closed (or merged).
 on:
@@ -60,10 +60,10 @@ jobs:
       #-----------------------------------------------
       # - Fetch manifest file from s3
       #
+      # - Drop CI environment associated with the PR
+      #
       # - Run and test modified dbt models and models
       #   downstream of them.
-      #
-      # - Drop CI environment associated with the PR
       #
       # - Write manifest file to s3 after run
       #-----------------------------------------------
