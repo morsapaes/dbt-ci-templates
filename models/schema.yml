@@ -1,3 +1,5 @@
+version: 2
+
 models:
   - name: fraud_activity
     description: "Detects when a user wins an auction as a bidder, and then is identified as a seller for an item at a higher price."
