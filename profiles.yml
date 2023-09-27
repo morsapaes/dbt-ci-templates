@@ -7,6 +7,7 @@ materialize:
       user: "{{ env_var('MZ_USER') }}"
       password: "{{ env_var('MZ_PASSWORD') }}"
       database: db_staging
+      schema: public
       cluster: "{{ env_var('CI_TAG') }}"
     production:
       type: materialize
@@ -15,5 +16,6 @@ materialize:
       user: "{{ env_var('MZ_USER') }}"
       password: "{{ env_var('MZ_PASSWORD') }}"
       database: db_production
+      schema: public
       cluster: demo
   target: staging
